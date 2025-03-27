@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from collections import Counter
 
-def compute_g0(outcar_name, plot_min_wavelength, plot_max_wavelength, cavity_length, semiconductor_length):
+def compute_g0(outcar_name, plot_min_wavelength, plot_max_wavelength, plot, cavity_length, semiconductor_length):
     assert plot_max_wavelength > plot_min_wavelength, "Invalid wavelength range for plotting"
     assert cavity_length > semiconductor_length, "Semiconductor must fit inside cavity"
 
@@ -59,7 +59,7 @@ def compute_g0(outcar_name, plot_min_wavelength, plot_max_wavelength, cavity_len
     if volumes:
         most_frequent_volume = Counter(volumes).most_common(1)[0][0]
         cell_volume = most_frequent_volume * 1e-30  # Convert to cubic meters
-        print(f'volume of cell: {cell_volume}')
+
     else:
         raise ValueError("No valid volume found in OUTCAR.")
 
@@ -92,40 +92,41 @@ def compute_g0(outcar_name, plot_min_wavelength, plot_max_wavelength, cavity_len
     filtered_omega = omega_array[plot_omega_mask]
     filtered_refractive_index = refractive_index_array[plot_wavelength_mask]
 
-    fig, axes = plt.subplots(1, 2, figsize=(12, 5))  # Adjust figsize to your preference
-
-    # Plot refractive index vs. wavelength in the first subplot
-    axes[0].plot(filtered_wavelength * 1e9, filtered_refractive_index, linestyle='-')
-    axes[0].set_xlabel("Wavelength (nm)")
-    axes[0].set_ylabel("Refractive index [-]")
-    axes[0].grid(True)
-
     # Compute g_0
     v_s = 4970 # m/s longitudinal acoustic phonon velocity in GaAs (along 100) (DOI: 10.1103/PhysRevB.63.224301)
     N = semiconductor_length / cell_volume**(1/3)  
-    print(f'n cells: {N:.2e}')
+    # print(f'n cells: {N:.2e}')
     m_Ga, m_As = 69.723, 74.921  # Atomic masses of Ga and As in amu
     N_Ga, N_As = 4, 4  # Number of Ga and As atoms in a unit cell
-    m = (N_Ga * m_Ga + N_As * m_As) * 1.66e-27  # Atomic mass in kg
+    m = (N_Ga * m_Ga + N_As * m_As) *1.66*1e-27 # Atomic mass in kg
 
-    prefactor = np.sqrt(hbar * semiconductor_length / (2 * np.pi * N * m * v_s))
-    print(f'prefactor {prefactor}')
+    # prefactor = np.sqrt(hbar * semiconductor_length / (2 * np.pi * N * m * v_s))
+    # print(f'prefactor {prefactor}')
     prefactor = 1e-6 # phonon mean free path in GaAs at room temperature around 1 micrometer (https://doi.org/10.1038/srep02963)
 
     denominator = cavity_length + semiconductor_length * (filtered_refractive_index - 1)
 
     g_0_array = filtered_omega * (1 - filtered_refractive_index) / denominator * prefactor
-    
-    # Plot g_0 vs. wavelength in the first subplot
-    axes[1].plot(filtered_wavelength*1e9, g_0_array)
-    axes[1].set_xlabel("Wavelength [nm]")
-    axes[1].set_ylabel("g_0 [rad/s]")
-    axes[1].grid(True)
 
-    # Show the plots
-    plt.suptitle(f"GaAs under hydrostatic {pressure} kB pressure")
-    plt.tight_layout()
-    plt.show()
+    if plot: 
+        fig, axes = plt.subplots(1, 2, figsize=(12, 5))  # Adjust figsize to your preference
+
+        # Plot refractive index vs. wavelength in the first subplot
+        axes[0].plot(filtered_wavelength * 1e9, filtered_refractive_index, linestyle='-')
+        axes[0].set_xlabel("Wavelength (nm)")
+        axes[0].set_ylabel("Refractive index [-]")
+        axes[0].grid(True)
+
+        # Plot g_0 vs. wavelength in the first subplot
+        axes[1].plot(filtered_wavelength*1e9, g_0_array)
+        axes[1].set_xlabel("Wavelength [nm]")
+        axes[1].set_ylabel("g_0 [rad/s]")
+        axes[1].grid(True)
+
+        # Show the plots
+        plt.suptitle(f"GaAs under hydrostatic {pressure} kB pressure")
+        plt.tight_layout()
+        plt.show()
 
 
     return filtered_omega, g_0_array
