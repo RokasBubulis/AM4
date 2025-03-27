@@ -1,0 +1,13 @@
+#!/bin/bash
+#SBATCH --partition=phys.edu.q           # Partition name
+#SBATCH --job-name=C.RUN1                # Job name
+#SBATCH --nodes=1                        # Number of nodes
+#SBATCH --ntasks-per-node=8              # Number of processes per node
+#SBATCH --time=2400:00:00                # Time limit hrs:min:sec
+#SBATCH --error=slurm-%j.err             # SLURM error
+#SBATCH --output=slurm-%j.out            # SLURM output
+
+# Run a batch of VASP calculations
+export PATH=/home/phys/20225641/vasp.6.4.3/bin:$PATH
+module load intel/2023a
+mpirun vasp643_std > vasp.out

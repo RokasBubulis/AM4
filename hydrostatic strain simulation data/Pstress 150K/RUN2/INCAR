@@ -1,0 +1,7 @@
+SYSTEM = GaAs
+PREC = Normal
+ENCUT = 500
+ISMEAR = -5
+SIGMA = 0.1
+IBRION = 2
+LOPTICS = .TRUE.
