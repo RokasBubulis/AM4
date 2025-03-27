@@ -93,21 +93,21 @@ def compute_fidelity(omega_array, g_0_array, alpha,
         plt.show()
 
     peak_times = {
-            "target_state10": tlist[np.argmax(fidelity_10)],
-            "target_state20": tlist[np.argmax(fidelity_20)],
-            "target_state21": tlist[np.argmax(fidelity_21)],
-            "target_state31": tlist[np.argmax(fidelity_31)],
-            "target_state22": tlist[np.argmax(fidelity_22)],
-            "target_state42": tlist[np.argmax(fidelity_42)]
+            "10": tlist[np.argmax(fidelity_10)],
+            "20": tlist[np.argmax(fidelity_20)],
+            "21": tlist[np.argmax(fidelity_21)],
+            "31": tlist[np.argmax(fidelity_31)],
+            "22": tlist[np.argmax(fidelity_22)],
+            "42": tlist[np.argmax(fidelity_42)]
         }
     
     max_fidelities = {
-        "target_state10": np.max(fidelity_10),
-        "target_state20": np.max(fidelity_20),
-        "target_state21": np.max(fidelity_21),
-        "target_state31": np.max(fidelity_31),
-        "target_state22": np.max(fidelity_22),
-        "target_state42": np.max(fidelity_42)
+        "10": np.max(fidelity_10),
+        "20": np.max(fidelity_20),
+        "21": np.max(fidelity_21),
+        "31": np.max(fidelity_31),
+        "22": np.max(fidelity_22),
+        "42": np.max(fidelity_42)
     }
 
     # Format and return the results as a dictionary
@@ -116,4 +116,4 @@ def compute_fidelity(omega_array, g_0_array, alpha,
         result[f"max_fidelity_{key}"] = np.format_float_scientific(max_fidelities[key], precision=2)
         result[f"peak_time_{key}"] = np.round(peak_times[key], 2)
 
-    return result
+    return max_fidelities, result
