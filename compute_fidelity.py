@@ -52,7 +52,7 @@ def compute_fidelity(omega_array, g_0_array, alpha,
     fidelity_21 = [np.abs(target_state21.overlap(state))**2 for state in evolved_states.states]
     fidelity_31 = [np.abs(target_state31.overlap(state))**2 for state in evolved_states.states]
     fidelity_22 = [np.abs(target_state22.overlap(state))**2 for state in evolved_states.states]
-    fidelity_42 = [np.abs(target_state42.overlap(state))**2 for state in evolved_states.states]
+    #fidelity_42 = [np.abs(target_state42.overlap(state))**2 for state in evolved_states.states]
 
     if plot:
         fig, axes = plt.subplots(1, 2, figsize=(12, 5))
@@ -96,18 +96,16 @@ def compute_fidelity(omega_array, g_0_array, alpha,
             "10": tlist[np.argmax(fidelity_10)],
             "20": tlist[np.argmax(fidelity_20)],
             "21": tlist[np.argmax(fidelity_21)],
-            "31": tlist[np.argmax(fidelity_31)],
             "22": tlist[np.argmax(fidelity_22)],
-            "42": tlist[np.argmax(fidelity_42)]
+            "31": tlist[np.argmax(fidelity_31)],
         }
     
     max_fidelities = {
         "10": np.max(fidelity_10),
         "20": np.max(fidelity_20),
         "21": np.max(fidelity_21),
-        "31": np.max(fidelity_31),
         "22": np.max(fidelity_22),
-        "42": np.max(fidelity_42)
+        "31": np.max(fidelity_31),
     }
 
     # Format and return the results as a dictionary
