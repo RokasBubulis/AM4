@@ -4,7 +4,7 @@ from collections import Counter
 
 def compute_g0(outcar_name, plot_min_wavelength, plot_max_wavelength, plot, cavity_length, semiconductor_length):
     assert plot_max_wavelength > plot_min_wavelength, "Invalid wavelength range for plotting"
-    assert cavity_length > semiconductor_length, "Semiconductor must fit inside cavity"
+    assert cavity_length >= semiconductor_length, "Semiconductor must fit inside cavity"
 
     # Read OUTCAR once
     with open(outcar_name, "r") as OUTCAR:
