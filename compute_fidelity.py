@@ -4,7 +4,8 @@ from qutip import tensor, num, qeye, create, destroy, basis, sesolve, expect, me
 
 def compute_fidelity(omega_array, g_0_array, alpha,
                      omega_photon, omega_phonon, photon_loss_rate,
-                     truncation_photon_space, truncation_phonon_space, simulation_time, plot = True, set_g_0= None):
+                     truncation_photon_space, truncation_phonon_space, simulation_time, plot_text,
+                     plot = True, set_g_0= None):
     
     index_photon_omega = np.abs(omega_array - omega_photon).argmin()
 
@@ -26,12 +27,13 @@ def compute_fidelity(omega_array, g_0_array, alpha,
     tlist = np.linspace(0, simulation_time, 1000)
 
     phonon_term = omega_phonon * tensor(num(truncation_phonon_space), qeye(truncation_photon_space))
-    cdagger_c_product = (alpha*qeye(truncation_photon_space)+create(truncation_photon_space)) @ (alpha*qeye(truncation_photon_space)+destroy(truncation_photon_space))
+    cdagger_c_product = (alpha*qeye(truncation_photon_space)+create(truncation_photon_space)) @ (
+        alpha*qeye(truncation_photon_space)+destroy(truncation_photon_space))
     photon_term = omega_photon * tensor(qeye(truncation_phonon_space), cdagger_c_product)
 
     coupling_term = g_0_at_photon_omega * tensor(create(truncation_phonon_space) + destroy(truncation_phonon_space), cdagger_c_product)
-
     H = phonon_term + photon_term + coupling_term
+
     if photon_loss_rate == 0:
         loss_operator = []
     else:
@@ -45,13 +47,18 @@ def compute_fidelity(omega_array, g_0_array, alpha,
     target_state21 = tensor(basis(truncation_phonon_space, 2), basis(truncation_photon_space, 1))
     target_state22 = tensor(basis(truncation_phonon_space, 2), basis(truncation_photon_space, 2))
     target_state31 = tensor(basis(truncation_phonon_space, 3), basis(truncation_photon_space, 1))
-    target_state42 = tensor(basis(truncation_phonon_space, 4), basis(truncation_photon_space, 2))
+    #target_state42 = tensor(basis(truncation_phonon_space, 4), basis(truncation_photon_space, 2))
 
-    fidelity_10 = [np.abs(target_state10.overlap(state))**2 for state in evolved_states.states]
-    fidelity_20 = [np.abs(target_state20.overlap(state))**2 for state in evolved_states.states]
-    fidelity_21 = [np.abs(target_state21.overlap(state))**2 for state in evolved_states.states]
-    fidelity_31 = [np.abs(target_state31.overlap(state))**2 for state in evolved_states.states]
-    fidelity_22 = [np.abs(target_state22.overlap(state))**2 for state in evolved_states.states]
+    fidelity_10 = expect(target_state10.proj(), evolved_states.states)
+    fidelity_20 = expect(target_state20.proj(), evolved_states.states)
+    fidelity_21 = expect(target_state21.proj(), evolved_states.states)
+    fidelity_22 = expect(target_state22.proj(), evolved_states.states)
+    fidelity_31 = expect(target_state31.proj(), evolved_states.states)
+    # fidelity_10 = [np.abs(target_state10.overlap(state))**2 for state in evolved_states.states]
+    # fidelity_20 = [np.abs(target_state20.overlap(state))**2 for state in evolved_states.states]
+    # fidelity_21 = [np.abs(target_state21.overlap(state))**2 for state in evolved_states.states]
+    # fidelity_31 = [np.abs(target_state31.overlap(state))**2 for state in evolved_states.states]
+    # fidelity_22 = [np.abs(target_state22.overlap(state))**2 for state in evolved_states.states]
     #fidelity_42 = [np.abs(target_state42.overlap(state))**2 for state in evolved_states.states]
 
     if plot:
@@ -61,8 +68,8 @@ def compute_fidelity(omega_array, g_0_array, alpha,
         axes[0].plot(tlist, fidelity_10, label=r'$\vert 10 \rangle$')
         axes[0].plot(tlist, fidelity_20, label=r'$\vert 20 \rangle$')
         axes[0].plot(tlist, fidelity_21, label=r'$\vert 21 \rangle$')
-        # axes[0].plot(tlist, fidelity_array_22, label=r'$\vert 22 \rangle$')
-        # axes[0].plot(tlist, fidelity_array_31, label=r'$\vert 31 \rangle$')
+        axes[0].plot(tlist, fidelity_22, label=r'$\vert 22 \rangle$')
+        axes[0].plot(tlist, fidelity_31, label=r'$\vert 31 \rangle$')
         # axes[0].plot(tlist, fidelity_array_42, label=r'$\vert 42 \rangle$')
         axes[0].set_xlabel("Time")
         axes[0].set_ylabel("Fidelity")
@@ -80,14 +87,13 @@ def compute_fidelity(omega_array, g_0_array, alpha,
         axes[1].plot(tlist, photon_expectation, label="Photons")
         axes[1].plot(tlist, phonon_expectation, label="Phonons")
         axes[1].set_xlabel("Time")
-        axes[1].set_ylabel("<n>")
+        axes[1].set_ylabel(r'$\langle n \rangle$')
         axes[1].legend()
-        axes[1].set_title("<n> vs Time")
+        axes[1].set_title("Populations against time")
         axes[1].grid(True)
 
-        fig.suptitle(rf'Input: $\lambda_c = {(2*np.pi*3*10**8/omega_photon_copy*10**6):.2f} \, \mu m$' 
-                    '\n'  # Correct way to break the line
-                    rf'$\omega_m = {omega_phonon:.2f} \, \omega_c$, $g_0 = {g_0_at_photon_omega:.2e} \, \omega_c$, $\alpha =$ {alpha}')
+        fig.suptitle(plot_text) #+ '\n' rf'Parameters: $\lambda_c = {(2*np.pi*3*10**8/omega_photon_copy*10**6):.2f} \, \mu m$, ' 
+        #             rf'$\omega_m = {omega_phonon:.2f} \, \omega_c$, $g_0 = {g_0_at_photon_omega:.2e} \, \omega_c$, $\alpha =$ {alpha}')
 
         plt.tight_layout()  # Adjust layout for better spacing
         plt.show()
